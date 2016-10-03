@@ -20,12 +20,12 @@ typedef struct _detail {
     char zip[5];
 } detail;
 
-typedef detail *pdetail;
+
 
 typedef struct __PHONE_BOOK_ENTRY {
     char *lastName;
     struct __PHONE_BOOK_ENTRY *pNext;
-    pdetail dtl;
+    detail * dtl;
 } entry;
 
 entry *findName(char lastname[], entry *pHead);
