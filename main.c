@@ -62,17 +62,14 @@ int main(int argc, char *argv[])
     printf("size of entry : %lu bytes\n", sizeof(entry));
     e = pHead;
     e->pNext = NULL;
-
 #if defined(__GNUC__)
     __builtin___clear_cache((char *) pHead, (char *) pHead + sizeof(entry));
 #endif
 
 #if defined(OPT)
-
 #ifndef THREAD_NUM
 #define THREAD_NUM 4
 #endif
-
     clock_gettime(CLOCK_REALTIME, &start);
     char *map = mmap(NULL, fs, PROT_READ, MAP_SHARED, fd, 0);
     assert(map && "mmap error");
@@ -81,34 +78,26 @@ int main(int argc, char *argv[])
     poolgap= fs / MAX_LAST_NAME_SIZE;
     //V2-------------------------------------/
     /* allocate at beginning */
-
     //V2-------------------------------------/
     entry *entry_pool = (entry *) malloc(sizeof(entry) * (poolgap)+THREAD_NUM*2);
     //V2-------------------------------------/
     entry *etmp;
-
     assert(entry_pool && "entry_pool error");
     pthread_setconcurrency(THREAD_NUM + 1);
-
     pthread_t *tid = (pthread_t *) malloc(sizeof( pthread_t) * THREAD_NUM);
     append_a **app = (append_a **) malloc(sizeof(append_a *) * THREAD_NUM);
-
     for (int i = 0; i < THREAD_NUM; i++)
         app[i] = new_append_a(map + MAX_LAST_NAME_SIZE * i, map + fs, i, THREAD_NUM, entry_pool + i*(poolgap/THREAD_NUM)+1);
     clock_gettime(CLOCK_REALTIME, &mid);
-
     for (int i = 0; i < THREAD_NUM; i++)
         pthread_create( &tid[i], NULL, (void *) &append, (void *) app[i]);
-
     for (int i = 0; i < THREAD_NUM; i++)
         pthread_join(tid[i], NULL);
-
 //Try to insert a muxtex see what happen
     pHead = pHead->pNext;
     pHead = app[0]->pHead;
     etmp = app[0]->pLast;
     dprintf("Connect %d head string %s %p\n", 0, app[0]->pHead->pNext->lastName, app[0]->ptr);
-
     for (int i = 1; i < THREAD_NUM; i++) {
         etmp->pNext = app[i]->pHead;
         dprintf("Connect %d head string %s %p\n", i, app[i]->pHead->pNext->lastName, app[i]->ptr);
@@ -116,10 +105,8 @@ int main(int argc, char *argv[])
         dprintf("Connect %d tail string %s %p\n", i, app[i]->pLast->lastName, app[i]->ptr);
         dprintf("round %d\n", i);
     }
-
     clock_gettime(CLOCK_REALTIME, &end);
     cpu_time1 = diff_in_second(start, end);
-
 #else
     clock_gettime(CLOCK_REALTIME, &start);
     while (fgets(line, sizeof(line), fp)) {
@@ -129,10 +116,8 @@ int main(int argc, char *argv[])
         i = 0;
         e = append(line, e);
     }
-
     clock_gettime(CLOCK_REALTIME, &end);
     cpu_time1 = diff_in_second(start, end);
-
 #endif
 
 #ifndef OPT
@@ -141,11 +126,9 @@ int main(int argc, char *argv[])
 #endif
 
     e = pHead;
-
     /* the givn last name to find */
     char input[MAX_LAST_NAME_SIZE] = WORD_NAME;
     e = pHead;
-
     assert(findName(input, e) &&
            "Did you implement findName() in " IMPL "?");
     assert(0 == strcmp(findName(input, e)->lastName, WORD_NAME));
@@ -168,11 +151,8 @@ int main(int argc, char *argv[])
 #endif
     fprintf(output, "append() findName() %lf %lf\n", cpu_time1, cpu_time2);
     fclose(output);
-
     printf("execution time of append() : %lf sec\n", cpu_time1);
     printf("execution time of findName() : %lf sec\n", cpu_time2);
-
-
 #if defined(OPT)
     free(entry_pool);
     free(tid);
