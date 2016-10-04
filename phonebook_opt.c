@@ -46,7 +46,6 @@ void append(void *arg)
     append_a *app = (append_a *) arg;
     int count = 0;
     entry *j = app->entryStart;
-
 //V2-------------------------------/
     for ( char *i = app->ptr; i < app->eptr;
             i += MAX_LAST_NAME_SIZE * app->nthread,
