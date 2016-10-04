@@ -10,7 +10,6 @@ entry *findName(char lastname[], entry *pHead)
 {
     size_t len = strlen( lastname);
     while (pHead != NULL) {
-        //printf("%s ", pHead->lastName);
         if (strncasecmp(lastname, pHead->lastName, len) == 0
                 && (pHead->lastName[len] == '\n' ||
                     pHead->lastName[len] == '\0')) {
@@ -48,10 +47,11 @@ void append(void *arg)
     int count = 0;
     entry *j = app->entryStart;
 
-
+//V2-------------------------------/
     for ( char *i = app->ptr; i < app->eptr;
             i += MAX_LAST_NAME_SIZE * app->nthread,
-            j += app->nthread,count++) {
+            j +=1,count++) {
+//V2-------------------------------/
         app->pLast->pNext = j;
         app->pLast = app->pLast->pNext;
         app->pLast->lastName = i;
