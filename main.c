@@ -10,7 +10,7 @@
 #include <sys/mman.h>
 
 #include IMPL
-#define WORD_NAME "katti"
+#define WORD_NAME "zzzzzzzz"
 #define DICT_FILE "./dictionary/words.txt"
 
 static double diff_in_second(struct timespec t1, struct timespec t2)
@@ -76,9 +76,15 @@ int main(int argc, char *argv[])
     clock_gettime(CLOCK_REALTIME, &start);
     char *map = mmap(NULL, fs, PROT_READ, MAP_SHARED, fd, 0);
     assert(map && "mmap error");
-
+    //V2-------------------------------------/
+    int poolgap;
+    poolgap= fs / MAX_LAST_NAME_SIZE;
+    //V2-------------------------------------/
     /* allocate at beginning */
-    entry *entry_pool = (entry *) malloc(sizeof(entry) * fs / MAX_LAST_NAME_SIZE);
+
+    //V2-------------------------------------/
+    entry *entry_pool = (entry *) malloc(sizeof(entry) * (poolgap)+THREAD_NUM*2);
+    //V2-------------------------------------/
     entry *etmp;
 
     assert(entry_pool && "entry_pool error");
@@ -88,14 +94,16 @@ int main(int argc, char *argv[])
     append_a **app = (append_a **) malloc(sizeof(append_a *) * THREAD_NUM);
 
     for (int i = 0; i < THREAD_NUM; i++)
-        app[i] = new_append_a(map + MAX_LAST_NAME_SIZE * i, map + fs, i, THREAD_NUM, entry_pool + i);
+        app[i] = new_append_a(map + MAX_LAST_NAME_SIZE * i, map + fs, i, THREAD_NUM, entry_pool + i*(poolgap/THREAD_NUM)+1);
     clock_gettime(CLOCK_REALTIME, &mid);
+
     for (int i = 0; i < THREAD_NUM; i++)
         pthread_create( &tid[i], NULL, (void *) &append, (void *) app[i]);
 
     for (int i = 0; i < THREAD_NUM; i++)
         pthread_join(tid[i], NULL);
 
+//Try to insert a muxtex see what happen
     pHead = pHead->pNext;
     pHead = app[0]->pHead;
     etmp = app[0]->pLast;
@@ -108,7 +116,7 @@ int main(int argc, char *argv[])
         dprintf("Connect %d tail string %s %p\n", i, app[i]->pLast->lastName, app[i]->ptr);
         dprintf("round %d\n", i);
     }
-    //pHead = app[0]->pHead->pNext;
+
     clock_gettime(CLOCK_REALTIME, &end);
     cpu_time1 = diff_in_second(start, end);
 
